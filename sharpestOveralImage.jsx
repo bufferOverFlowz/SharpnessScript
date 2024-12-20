@@ -15,7 +15,7 @@ function calculateSharpness(imageDoc) {
     }
 
     tempDoc.close(SaveOptions.DONOTSAVECHANGES);    // Close temporary document
-    return sharpnessScore;
+    return sharpnessScore; // Return raw sharpness score
 }
 
 // Function to save a copy of the image
@@ -62,8 +62,8 @@ function findSharpestImages() {
             imageDoc = open(file); // Open the image file
 
             // Calculate sharpness score
-            var score = Math.round(calculateSharpness(imageDoc)); // Round for readability
-            sharpnessScores.push({ file: file, doc: imageDoc, score: score });
+            var score = calculateSharpness(imageDoc);
+            sharpnessScores.push({ file: file, score: score });
 
         } catch (err) {
             alert("Error processing file: " + file.name + "\nError: " + err.message);
@@ -79,17 +79,23 @@ function findSharpestImages() {
         return b.score - a.score;
     });
 
-    // Display results
-    var result = "Sharpness Ratings:\n";
+    // Assign ranks: sharpest is 1, least sharp is total number of files
+    var totalFiles = sharpnessScores.length;
     for (var j = 0; j < sharpnessScores.length; j++) {
-        result += sharpnessScores[j].file.name + ": " + sharpnessScores[j].score + "\n";
+        sharpnessScores[j].ranking = j + 1; // Rank in ascending order (1 to totalFiles)
+    }
+
+    // Display results
+    var result = "Ranking: Smaller numbers represent sharper images.\n\nSharpness Rankings (1 to " + totalFiles + "):\n";
+    for (var k = 0; k < sharpnessScores.length; k++) {
+        result += sharpnessScores[k].file.name + ": " + sharpnessScores[k].ranking + "\n";
     }
 
     // Save the top 5 sharpest images
     var topCount = Math.min(5, sharpnessScores.length);
-    for (var k = 0; k < topCount; k++) {
-        var topImage = open(sharpnessScores[k].file);
-        saveCopy(topImage, outputFolder, "Top_" + (k + 1) + "_" + sharpnessScores[k].file.name);
+    for (var l = 0; l < topCount; l++) {
+        var topImage = open(sharpnessScores[l].file);
+        saveCopy(topImage, outputFolder, "Top_" + (l + 1) + "_" + sharpnessScores[l].file.name);
         topImage.close(SaveOptions.DONOTSAVECHANGES);
     }
 
